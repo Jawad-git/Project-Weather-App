@@ -1,4 +1,74 @@
-.red
+html, body
 {
-    color: red;
+    margin: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#container
+{
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+table
+{
+    border: coll;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+th, td
+{
+    padding: 0.5em;
+    text-align: center;
+    border: 1px black solid;
+}
+
+.currentDay
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 280px;
+}
+
+.address
+{
+    margin: 24px 0px;
+    font-size: x-large;
+}
+
+.midSection
+{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.currentDetails
+{
+    display: flex;
+    flex-direction: column;
+    font-size: 18px;
+}
+
+.currentDetails h5
+{
+    margin: 0.7em;
+}
+
+.localTime
+{
+    width: 100%;
+    text-align: center;
+}
+
+h3
+{
+    margin: 1em ;
 }
