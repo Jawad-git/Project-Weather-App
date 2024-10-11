@@ -25,7 +25,6 @@ let apiCalls = (() =>
         let address = data.address;
         let days = data.days.slice(0, 7);
         let condition = data.currentConditions.conditions;
-        //let icon = data.currentConditions.icon;
         let localTime = data.currentConditions.datetime;
         let temp = data.currentConditions.temp;
         let feelsLike = data.currentConditions.feelslike;

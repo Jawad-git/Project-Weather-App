@@ -72,3 +72,16 @@ h3
 {
     margin: 1em ;
 }
+
+img[src$=".svg"]
+{
+    width: 16px;
+}
+
+.imgTd
+{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px black solid;
+}

@@ -1,5 +1,5 @@
 import "./styles.css";
 import apiCalls from "./apiCalls";
 
-apiCalls.getWeather("Scotland");
+apiCalls.getWeather("damascus");
 apiCalls.getBackground("window rain");
