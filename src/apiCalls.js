@@ -8,7 +8,7 @@ let apiCalls = (() =>
         let dataJson = await response.json();
         let finalData = WeatherData(dataJson);
         console.log(dataJson);
-        domHandler.displayWeather(finalData);
+        return finalData;
         
     }
     // call the gif api based on what type of weather it is
@@ -28,7 +28,8 @@ let apiCalls = (() =>
         let localTime = data.currentConditions.datetime;
         let temp = data.currentConditions.temp;
         let feelsLike = data.currentConditions.feelslike;
-        return {resolvedAddress, address, days, condition, localTime, temp, feelsLike};
+        let icon = data.currentConditions.icon;
+        return {resolvedAddress, address, days, condition, localTime, temp, feelsLike, icon};
     }
 
 

@@ -6,10 +6,11 @@ let DivBuilder = commonBuilders.DivBuilder;
 let TextBuilder = commonBuilders.TextBuilder;
 let domHandler = (() => {
     let isFahrenheit = true;
+    let onSubmitNewLocation;
 
     let displayWeather = (finalData) =>
     {
-        let button = commonBuilders.ButtonBuilder("Change to C", "toggleMetric", toggleUnits);
+        let button = commonBuilders.ButtonBuilder("Switch to °C", "toggleMetric", toggleUnits);
         let inputDetails = DivBuilder("class", "input");
         FillOutInputDetails(inputDetails);
         let Currently = DivBuilder("class", "currentDay");
@@ -17,18 +18,41 @@ let domHandler = (() => {
         let comingDays = DivBuilder("class", "comingDays");
         FillOutComingDays(comingDays, finalData);
         document.getElementById("container").innerHTML = "";
-        document.getElementById("container").append(button, inputDetails, Currently, comingDays);
+        ChangeBackgroundImage(finalData);
+        document.getElementById("container").append( Currently, comingDays, inputDetails, button);
     }
 
+    let ChangeBackgroundImage = async (finalData) => {
+        let body = document.getElementsByTagName("body")[0]; // Get the body element
+        let img;
+    
+        // Determine the image based on the weather icon
+        if (finalData.icon.includes("cloudy")) {
+            img = await loadImage(`cloudy`, `jpg`, `Images`);
+        } else if (finalData.icon.includes("clear")) {
+            img = await loadImage(`clear`, `jpg`, `Images`);
+        } else if (finalData.icon.includes("rain")) {
+            img = await loadImage(`rain`, `jpg`, `Images`);
+        } else {
+            img = await loadImage(`default`, `jpg`, `Images`);
+        }
+    
+        // Set the background image using inline style
+        body.style.backgroundImage = `url(${img.src})`;
+        //body.style.transition = 'background-image 0.5s ease-in-out'; // Optional: add transition for smooth change
+        //background-repeat: no-repeat; /* Prevent the image from repeating */
+        body.style.backgroundSize = "cover";
+        body.style.backgroundPosition = "center";
+    }
     let FillOutInputDetails = (inputDetails) =>
     {
         let input = document.createElement("input");
         
-        let getNewWeather = () => 
-        {
-            let newForecast = input.value;
-            apiCalls.getWeather(newForecast);
-        }
+        let getNewWeather = () => {
+            if (onSubmitNewLocation) {
+                onSubmitNewLocation(input.value);  // Emit event instead of calling apiCalls directly
+            }
+        };
         let submit = commonBuilders.ButtonBuilder("get forecast", "newLocation", getNewWeather);
         inputDetails.append(input, submit);
     }
@@ -37,15 +61,15 @@ let domHandler = (() => {
     {
         let address = TextBuilder("h3", `${finalData.address}, ${finalData.resolvedAddress}`, "address");
         let midSection = DivBuilder("class", "midSection");
-        let temp = TextBuilder("h1", `Temp: ${Math.round(finalData.temp)}`, "realTemp fahrenheit");
-        temp.setAttribute("data-temp-fahrenheit", finalData.temp);
+        let temp = TextBuilder("h1", `Temp: ${Math.round(finalData.temp)}°F`, "realTemp fahrenheit");
+        temp.setAttribute("data-temp-fahrenheit", Math.round(finalData.temp));
         let currentDetails = DivBuilder("class", "currentDetails");
-        let condition = TextBuilder("h5", `${finalData.condition}`, "condition");
-        let feelsLike = TextBuilder("h5", `feels like: ${Math.round(finalData.feelsLike)}`, "feelsLike fahrenheit");
-        feelsLike.setAttribute("data-temp-fahrenheit", finalData.feelsLike);
+        let condition = TextBuilder("h5", `Condition: ${finalData.condition}`, "condition");
+        let feelsLike = TextBuilder("h5", `feels like: ${Math.round(finalData.feelsLike)}°F`, "feelsLike fahrenheit");
+        feelsLike.setAttribute("data-temp-fahrenheit", Math.round(finalData.feelsLike));
         currentDetails.append(condition, feelsLike);
         midSection.append(temp, currentDetails);
-        let localTime = TextBuilder("h3", `Local time: ${finalData.localTime}`, "localTime");
+        let localTime = TextBuilder("h3", `As of Local time: ${finalData.localTime}`, "localTime");
         Currently.append(address, midSection, localTime);
     }
 
@@ -88,19 +112,20 @@ let domHandler = (() => {
             tr.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
                 tr.innerHTML = 
                 `<td>${day.datetime}</td>
-                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.feelslike)}>${Math.round(day.feelslike)}</td>
-                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[0].temp)}>${Math.round(day.hours[0].temp)}</td>
-                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[6].temp)} >${Math.round(day.hours[6].temp)}</td>
-                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[12].temp)} >${Math.round(day.hours[12].temp)}</td>
-                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[18].temp)} >${Math.round(day.hours[18].temp)}</td>`;
+                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.feelslike)}>${Math.round(day.feelslike)}°F</td>
+                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[0].temp)}>${Math.round(day.hours[0].temp)}°F</td>
+                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[6].temp)} >${Math.round(day.hours[6].temp)}°F</td>
+                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[12].temp)} >${Math.round(day.hours[12].temp)}°F</td>
+                <td class="fahrenheit" data-temp-fahrenheit=${Math.round(day.hours[18].temp)} >${Math.round(day.hours[18].temp)}°F</td>`;
                 tr.insertBefore(imgTd, tr.children[1]);
                 table.append(tr);
             };
             comingDays.append(table);
     }
 
-    function loadImage(imageName) {
-        return import(`./Icons/${imageName}.svg`)
+    function loadImage(imageName, type="svg", file="Icons") 
+    {
+        return import(`./${file}/${imageName}.${type}`)
         .then(imageModule => {
           const img = document.createElement('img');
           img.src = imageModule.default;  // The default export will be the image URL
@@ -109,17 +134,19 @@ let domHandler = (() => {
         .catch(err => {
           console.error('Image loading failed', err);
         });
-      }
+    }
 
-    let convertToCelsius = (fahrenheit) => {
+    let convertToCelsius = (fahrenheit) => 
+    {
         return Math.round((fahrenheit - 32) * 5 / 9);
     }
 
-    let toggleUnits = () => {
+    let toggleUnits = () => 
+    {
         isFahrenheit = !isFahrenheit;
     
         // Update button text
-        document.querySelector(".toggleMetric").textContent = isFahrenheit ? "Switch to Celsius" : "Switch to Fahrenheit";
+        document.querySelector(".toggleMetric").textContent = isFahrenheit ? "Switch to °C" : "Switch to °F";
     
         // Update current day temperature
         let tempElement = document.querySelector(".realTemp");
@@ -152,8 +179,11 @@ let domHandler = (() => {
             }
         });
     }
+    let registerNewLocationHandler = (callback) => {
+        onSubmitNewLocation = callback;  // Set callback for external handler
+    };
 
-    return {displayWeather};
+    return {displayWeather, registerNewLocationHandler};
 })();
 
 export default domHandler;
