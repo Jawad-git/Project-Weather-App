@@ -59,13 +59,17 @@ let domHandler = (() => {
 
     let FillOutCurrentDay = (Currently, finalData) =>
     {
+        
         let address = TextBuilder("h3", `${finalData.address}, ${finalData.resolvedAddress}`, "address");
         let midSection = DivBuilder("class", "midSection");
         let temp = TextBuilder("h1", `Temp: ${Math.round(finalData.temp)}°F`, "realTemp fahrenheit");
+
         temp.setAttribute("data-temp-fahrenheit", Math.round(finalData.temp));
+        
         let currentDetails = DivBuilder("class", "currentDetails");
         let condition = TextBuilder("h5", `Condition: ${finalData.condition}`, "condition");
         let feelsLike = TextBuilder("h5", `feels like: ${Math.round(finalData.feelsLike)}°F`, "feelsLike fahrenheit");
+        
         feelsLike.setAttribute("data-temp-fahrenheit", Math.round(finalData.feelsLike));
         currentDetails.append(condition, feelsLike);
         midSection.append(temp, currentDetails);
